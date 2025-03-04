@@ -2,13 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Baccarat Game</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
             font-family: Arial, sans-serif;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         #game-container {
             position: relative;
@@ -25,28 +29,70 @@
             justify-content: center;
             gap: 10px;
             z-index: 10;
+            flex-wrap: wrap;
         }
         .bet-button {
             background-color: #4CAF50;
             border: none;
             color: white;
-            padding: 15px 32px;
+            padding: 15px 20px;
             text-align: center;
             text-decoration: none;
             display: inline-block;
-            font-size: 16px;
+            font-size: clamp(14px, 3vw, 16px);
             margin: 4px 2px;
             cursor: pointer;
             border-radius: 8px;
             transition: all 0.3s;
+            min-width: 120px;
+            touch-action: manipulation;
         }
-        .bet-button:hover {
-            background-color: #45a049;
-            transform: scale(1.05);
+        @media (max-width: 768px) {
+            .bet-button {
+                padding: 12px 16px;
+                min-width: 100px;
+            }
+            #ui-container {
+                bottom: 10px;
+                gap: 5px;
+            }
+            #balance {
+                font-size: 18px !important;
+                padding: 10px 15px !important;
+            }
+            #bet-amount {
+                bottom: 90px !important;
+            }
+            #bet-slider {
+                width: 200px !important;
+            }
+            .card-value {
+                font-size: 18px !important;
+                padding: 8px 15px !important;
+            }
+            .bet-indicator {
+                font-size: 14px !important;
+                padding: 10px !important;
+                width: 20px !important;
+                height: 20px !important;
+            }
+            #help-panel {
+                width: 250px !important;
+                font-size: 14px !important;
+            }
         }
-        .bet-button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
+        @media (max-width: 480px) {
+            .bet-button {
+                padding: 10px 14px;
+                min-width: 80px;
+                font-size: 12px;
+            }
+            #balance {
+                font-size: 16px !important;
+            }
+            #bet-slider {
+                width: 150px !important;
+            }
         }
         #player-button {
             background-color: #008CBA;
@@ -65,21 +111,9 @@
             color: white;
             padding: 15px 20px;
             border-radius: 10px;
-            font-size: 24px;
+            font-size: clamp(18px, 4vw, 24px);
             font-weight: bold;
-        }
-        #result {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            font-size: 24px;
-            display: none;
-            text-align: center;
+            z-index: 100;
         }
         #bet-amount {
             position: absolute;
@@ -87,9 +121,11 @@
             left: 0;
             right: 0;
             text-align: center;
+            z-index: 100;
         }
         input[type=range] {
-            width: 300px;
+            width: clamp(200px, 50vw, 300px);
+            margin: 0 auto;
         }
         #bet-value {
             margin-left: 10px;
@@ -97,17 +133,8 @@
             color: white;
             padding: 10px 15px;
             border-radius: 8px;
-            font-size: 20px;
+            font-size: clamp(16px, 3vw, 20px);
             font-weight: bold;
-        }
-        #new-game {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            margin-top: 60px;
-            background-color: #4CAF50;
-            display: none;
         }
         #help-button {
             position: absolute;
@@ -121,6 +148,8 @@
             height: 40px;
             font-size: 20px;
             cursor: pointer;
+            z-index: 100;
+            touch-action: manipulation;
         }
         #help-panel {
             position: absolute;
@@ -130,9 +159,122 @@
             color: white;
             padding: 20px;
             border-radius: 10px;
-            width: 300px;
+            width: clamp(250px, 80vw, 300px);
             display: none;
             z-index: 100;
+            font-size: clamp(14px, 2.5vw, 16px);
+        }
+        .card-value {
+            position: absolute;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: clamp(18px, 3.5vw, 24px);
+            font-weight: bold;
+            z-index: 90;
+        }
+        #game-over-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #game-over-content {
+            background: white;
+            padding: clamp(20px, 5vw, 40px);
+            border-radius: 15px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            margin: 20px;
+        }
+        #game-over-content h2 {
+            font-size: clamp(24px, 5vw, 28px);
+        }
+        #game-over-content p {
+            font-size: clamp(16px, 3vw, 18px);
+        }
+        #signup-form-end input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        #signup-form-end button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: clamp(14px, 3vw, 16px);
+            margin-top: 10px;
+            width: 100%;
+            touch-action: manipulation;
+        }
+        #new-game {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            margin-top: 60px;
+            background-color: #4CAF50;
+            display: none;
+        }
+        #leaderboard {
+            position: absolute;
+            top: 20px;
+            right: 80px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #ad-space {
+            width: 100%;
+            max-width: 500px;
+            height: 250px;
+            background: #ddd;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: #666;
+        }
+        #restart-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 20px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        #all-in-button {
+            background-color: #ff9800;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+        #all-in-button:hover {
+            background-color: #f57c00;
+            transform: scale(1.05);
         }
         #close-help {
             position: absolute;
@@ -143,15 +285,6 @@
             color: white;
             font-size: 20px;
             cursor: pointer;
-        }
-        .card-value {
-            position: absolute;
-            color: white;
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 24px;
-            font-weight: bold;
         }
         #player-total {
             top: 40%;
@@ -241,96 +374,20 @@
         #signup-form button:hover {
             background: #45a049;
         }
-        #leaderboard {
-            position: absolute;
-            top: 20px;
-            right: 80px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        #game-over-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            flex-direction: column;
-        }
-        #game-over-content {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-        }
-        #game-over-content h2 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
-        #game-over-content p {
-            font-size: 18px;
-            margin: 20px 0;
-        }
-        #ad-space {
-            width: 100%;
-            max-width: 500px;
-            height: 250px;
-            background: #ddd;
-            margin: 20px 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            color: #666;
-        }
-        #restart-button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 8px;
-            font-size: 20px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        #all-in-button {
-            background-color: #ff9800;
-            margin-left: 10px;
-            font-weight: bold;
-        }
-        #all-in-button:hover {
-            background-color: #f57c00;
-            transform: scale(1.05);
-        }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <div id="signup-overlay">
-            <div id="signup-form">
-                <h2>Welcome to Baccarat!</h2>
-                <p>Sign up to track your earnings on the leaderboard</p>
-                <input type="email" id="email-input" placeholder="Enter your email">
-                <button onclick="startGame()">Start Playing</button>
-            </div>
-        </div>
         <div id="game-over-overlay">
             <div id="game-over-content">
                 <h2>Game Over</h2>
                 <p>You've run out of balance!</p>
                 <div id="ad-space">Advertisement Space</div>
-                <button id="restart-button" onclick="restartGame()">Restart Game ($1000)</button>
+                <div id="signup-form-end">
+                    <p>Sign up to save your progress and get a bonus!</p>
+                    <input type="email" id="email-input-end" placeholder="Enter your email">
+                    <button onclick="signupAndRestart()">Sign Up & Restart ($1000)</button>
+                </div>
             </div>
         </div>
         <div id="leaderboard">Leaderboard</div>
@@ -559,31 +616,6 @@
             }
         }
 
-        function startGame() {
-            const email = document.getElementById('email-input').value;
-            if (!email || !email.includes('@')) {
-                alert('Please enter a valid email address');
-                return;
-            }
-            
-            playerEmail = email;
-            document.getElementById('signup-overlay').style.display = 'none';
-            
-            // Initialize sounds after user interaction
-            initSounds();
-            
-            // Initialize the game
-            init();
-            
-            // Update leaderboard
-            updateLeaderboard();
-            
-            // Enable betting buttons
-            document.querySelectorAll('.bet-button').forEach(button => {
-                button.disabled = false;
-            });
-        }
-
         function init() {
             // Create scene with darker background
             scene = new THREE.Scene();
@@ -630,7 +662,6 @@
             document.getElementById('player-button').addEventListener('click', () => placeBet('player'));
             document.getElementById('banker-button').addEventListener('click', () => placeBet('banker'));
             document.getElementById('tie-button').addEventListener('click', () => placeBet('tie'));
-            document.getElementById('new-game').addEventListener('click', startNewGame);
             document.getElementById('help-button').addEventListener('click', showHelp);
             document.getElementById('close-help').addEventListener('click', hideHelp);
             
@@ -645,6 +676,11 @@
             
             // Play shuffle sound
             playSound('shuffle');
+
+            // Enable betting buttons
+            document.querySelectorAll('.bet-button').forEach(button => {
+                button.disabled = false;
+            });
         }
 
         function createCardTexture(value, color1 = '#ffffff', color2 = '#ff0000') {
@@ -1090,7 +1126,17 @@
                 // Display result
                 document.getElementById('result').innerHTML = result;
                 document.getElementById('result').style.display = 'block';
-                document.getElementById('new-game').style.display = 'block';
+                
+                // Check if game is over
+                if (balance <= 0) {
+                    document.getElementById('game-over-overlay').style.display = 'flex';
+                    return;
+                }
+                
+                // Automatically start new round after 2 seconds
+                setTimeout(() => {
+                    startNewGame();
+                }, 2000);
                 
                 updateLeaderboard();
             }, 1000);
@@ -1141,7 +1187,6 @@
             
             // Hide all UI elements
             document.getElementById('result').style.display = 'none';
-            document.getElementById('new-game').style.display = 'none';
             document.getElementById('player-total').style.display = 'none';
             document.getElementById('banker-total').style.display = 'none';
             document.getElementById('player-bet').style.display = 'none';
@@ -1198,20 +1243,42 @@
 
         function checkGameOver() {
             if (balance <= 0) {
+                const gameOverContent = document.getElementById('game-over-content');
+                gameOverContent.innerHTML = `
+                    <h2>Game Over</h2>
+                    <p>You've run out of balance!</p>
+                    <div id="ad-space">Advertisement Space</div>
+                    <div id="signup-form-end">
+                        <p>Sign up to save your progress and get a bonus!</p>
+                        <input type="email" id="email-input-end" placeholder="Enter your email">
+                        <button onclick="signupAndRestart()">Sign Up & Restart ($1000)</button>
+                    </div>
+                `;
                 document.getElementById('game-over-overlay').style.display = 'flex';
                 return true;
             }
             return false;
         }
 
-        function restartGame() {
+        function signupAndRestart() {
+            const email = document.getElementById('email-input-end').value;
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            playerEmail = email;
             balance = 1000;
             document.getElementById('balance').textContent = `Balance: $${balance}`;
             document.getElementById('game-over-overlay').style.display = 'none';
             startNewGame();
+            updateLeaderboard();
         }
 
         document.getElementById('all-in-button').addEventListener('click', allIn);
+
+        // Initialize the game directly
+        init();
     </script>
 </body>
 </html>
