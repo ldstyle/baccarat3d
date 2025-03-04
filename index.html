@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baccarat Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        #ui-container {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            z-index: 10;
+        }
+        .bet-button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .bet-button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        .bet-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #player-button {
+            background-color: #008CBA;
+        }
+        #banker-button {
+            background-color: #f44336;
+        }
+        #tie-button {
+            background-color: #555555;
+        }
+        #balance {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        #result {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 24px;
+            display: none;
+            text-align: center;
+        }
+        #bet-amount {
+            position: absolute;
+            bottom: 120px;
+            left: 0;
+            right: 0;
+            text-align: center;
+        }
+        input[type=range] {
+            width: 300px;
+        }
+        #bet-value {
+            margin-left: 10px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        #new-game {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            margin-top: 60px;
+            background-color: #4CAF50;
+            display: none;
+        }
+        #help-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        #help-panel {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            display: none;
+            z-index: 100;
+        }
+        #close-help {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .card-value {
+            position: absolute;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        #player-total {
+            top: 40%;
+            left: 35%;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+        #banker-total {
+            top: 40%;
+            right: 35%;
+            transform: translate(50%, -50%);
+            display: none;
+        }
+        .bet-indicator {
+            position: absolute;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+            display: none;
+            font-size: 18px;
+        }
+        #player-bet {
+            top: 30%;
+            left: 35%;
+            transform: translate(-50%, -150%);
+            background-color: #008CBA;
+        }
+        #banker-bet {
+            top: 30%;
+            right: 35%;
+            transform: translate(50%, -150%);
+            background-color: #f44336;
+        }
+        #tie-bet {
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #555555;
+        }
+        #signup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #signup-form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        #signup-form h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        #signup-form input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        #signup-form button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        #signup-form button:hover {
+            background: #45a049;
+        }
+        #leaderboard {
+            position: absolute;
+            top: 20px;
+            right: 80px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #game-over-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+        }
+        #game-over-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        #game-over-content h2 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        #game-over-content p {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        #ad-space {
+            width: 100%;
+            max-width: 500px;
+            height: 250px;
+            background: #ddd;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: #666;
+        }
+        #restart-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 20px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        #all-in-button {
+            background-color: #ff9800;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+        #all-in-button:hover {
+            background-color: #f57c00;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="signup-overlay">
+            <div id="signup-form">
+                <h2>Welcome to Baccarat!</h2>
+                <p>Sign up to track your earnings on the leaderboard</p>
+                <input type="email" id="email-input" placeholder="Enter your email">
+                <button onclick="startGame()">Start Playing</button>
+            </div>
+        </div>
+        <div id="game-over-overlay">
+            <div id="game-over-content">
+                <h2>Game Over</h2>
+                <p>You've run out of balance!</p>
+                <div id="ad-space">Advertisement Space</div>
+                <button id="restart-button" onclick="restartGame()">Restart Game ($1000)</button>
+            </div>
+        </div>
+        <div id="leaderboard">Leaderboard</div>
+        <div id="balance">Balance: $1000</div>
+        <div id="bet-amount">
+            <input type="range" id="bet-slider" min="5" max="100" step="5" value="25">
+            <span id="bet-value">$25</span>
+        </div>
+        <div id="ui-container">
+            <button id="player-button" class="bet-button">Bet on Player</button>
+            <button id="banker-button" class="bet-button">Bet on Banker</button>
+            <button id="tie-button" class="bet-button">Bet on Tie</button>
+            <button id="all-in-button" class="bet-button">All In</button>
+        </div>
+        <div id="result"></div>
+        <button id="new-game" class="bet-button">New Game</button>
+        <button id="help-button">?</button>
+        <div id="help-panel">
+            <button id="close-help">×</button>
+            <h3>Baccarat Rules</h3>
+            <p>The goal is to bet on which hand will have a total closest to 9.</p>
+            <p><strong>Card Values:</strong> Cards 2-9 are worth face value. 10s, Jacks, Queens, and Kings are worth 0. Aces are worth 1.</p>
+            <p>If the total exceeds 9, the first digit is dropped (e.g., 15 becomes 5).</p>
+            <p><strong>Payouts:</strong></p>
+            <ul>
+                <li>Player: 1:1</li>
+                <li>Banker: 0.95:1 (5% commission)</li>
+                <li>Tie: 8:1</li>
+            </ul>
+        </div>
+        <div id="player-total" class="card-value">Player: 0</div>
+        <div id="banker-total" class="card-value">Banker: 0</div>
+        <div id="player-bet" class="bet-indicator">$0</div>
+        <div id="banker-bet" class="bet-indicator">$0</div>
+        <div id="tie-bet" class="bet-indicator">$0</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+    <script>
+        // Game variables
+        let scene, camera, renderer;
+        let table, shoe;
+        let playerCards = [], bankerCards = [];
+        let balance = 1000;
+        let currentBet = 25;
+        let bettingOn = null;
+        let gameInProgress = false;
+        let playerBet = 0, bankerBet = 0, tieBet = 0;
+        let playerEmail = null;
+        let leaderboardData = [];
+
+        // Card textures and materials
+        const cardWidth = 1;
+        const cardHeight = 1.4;
+        let cardTextures = null;
+        
+        // Card values for the deck
+        const cardValues = [
+            'A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'
+        ];
+        
+        const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+        
+        // Sound effects with casino-style sounds
+        const sounds = {
+            deal: new Audio('https://assets.mixkit.co/active_storage/sfx/2832/2832-preview.mp3'),     // Crisp card sound
+            shuffle: new Audio('https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3'),  // Cheerful casino jingle
+            win: new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'),    // Upbeat winning sound
+            lose: new Audio('https://assets.mixkit.co/active_storage/sfx/942/942-preview.mp3')      // Soft "awe" sound
+        };
+
+        // Add after the card textures declaration
+        let chipModels = {};
+        const chipValues = [5, 25, 100, 500];
+        const chipColors = {
+            5: 0xff0000,    // Red
+            25: 0x0000ff,   // Blue
+            100: 0x00ff00,  // Green
+            500: 0x000000   // Black
+        };
+
+        function createChipModel(value) {
+            const group = new THREE.Group();
+            
+            // Create chip body - increased size and adjusted dimensions
+            const geometry = new THREE.CylinderGeometry(0.4, 0.4, 0.1, 32);
+            const material = new THREE.MeshStandardMaterial({
+                color: chipColors[value],
+                metalness: 0.7,
+                roughness: 0.2
+            });
+            const chip = new THREE.Mesh(geometry, material);
+            group.add(chip);
+            
+            // Add value text - increased size
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const context = canvas.getContext('2d');
+            
+            context.fillStyle = 'white';
+            context.font = 'bold 96px Arial';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText('$' + value, 128, 128);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const textGeometry = new THREE.PlaneGeometry(0.3, 0.3);
+            const textMaterial = new THREE.MeshBasicMaterial({
+                map: texture,
+                transparent: true,
+                side: THREE.DoubleSide
+            });
+            
+            const textMesh1 = new THREE.Mesh(textGeometry, textMaterial);
+            textMesh1.position.y = 0.051;
+            textMesh1.rotation.x = -Math.PI / 2;
+            
+            const textMesh2 = textMesh1.clone();
+            textMesh2.position.y = -0.051;
+            textMesh2.rotation.x = Math.PI / 2;
+            
+            group.add(textMesh1);
+            group.add(textMesh2);
+            
+            return group;
+        }
+
+        function createChips() {
+            // Create initial chip stacks on the table
+            chipValues.forEach((value, index) => {
+                chipModels[value] = createChipModel(value);
+                
+                // Create a stack of 5 chips for each value
+                for (let i = 0; i < 5; i++) {
+                    const chip = chipModels[value].clone();
+                    // Position chips in a row near the betting controls
+                    chip.position.set(-4 + (index * 2), 0.1 + (i * 0.11), 2.5);
+                    scene.add(chip);
+                }
+            });
+        }
+
+        function showWinningAnimation(amount, position) {
+            const numChips = Math.min(20, Math.ceil(amount / 100));
+            const chipValue = chipValues[Math.floor(Math.random() * chipValues.length)];
+            
+            for (let i = 0; i < numChips; i++) {
+                const chip = chipModels[chipValue].clone();
+                chip.position.copy(position);
+                chip.position.y += 0.1; // Start slightly above the table
+                scene.add(chip);
+                
+                // Random arc animation with higher arc
+                const targetX = position.x + (Math.random() - 0.5) * 4;
+                const targetZ = position.z + (Math.random() - 0.5) * 4;
+                const height = 3 + Math.random() * 2;
+                
+                new TWEEN.Tween(chip.position)
+                    .to({ 
+                        x: targetX,
+                        y: height,
+                        z: targetZ
+                    }, 1500)
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .chain(
+                        new TWEEN.Tween(chip.position)
+                            .to({ y: 0.1 }, 800)
+                            .easing(TWEEN.Easing.Bounce.Out)
+                    )
+                    .start();
+                
+                // More dramatic rotation
+                new TWEEN.Tween(chip.rotation)
+                    .to({ 
+                        x: Math.random() * Math.PI * 6,
+                        y: Math.random() * Math.PI * 6,
+                        z: Math.random() * Math.PI * 6
+                    }, 2300)
+                    .start();
+                
+                // Remove chip after animation
+                setTimeout(() => {
+                    scene.remove(chip);
+                }, 2400);
+            }
+        }
+
+        // Add sound initialization function
+        function initSounds() {
+            // Pre-load sounds and set appropriate volumes
+            Object.entries(sounds).forEach(([name, sound]) => {
+                sound.load();
+                sound.preload = 'auto';  // Ensure sounds are preloaded
+                // Different volumes for different sounds
+                switch(name) {
+                    case 'win':
+                        sound.volume = 0.7;  // Louder winning sound
+                        break;
+                    case 'shuffle':
+                        sound.volume = 0.4;  // Background jingle
+                        break;
+                    case 'deal':
+                        sound.volume = 0.5;  // Increased card sound volume
+                        break;
+                    case 'lose':
+                        sound.volume = 0.2;  // Very subtle losing sound
+                        break;
+                }
+            });
+        }
+
+        // Update playSound function to ensure sounds play
+        function playSound(soundName) {
+            const sound = sounds[soundName];
+            if (sound) {
+                sound.currentTime = 0;  // Reset the sound to start
+                sound.play().catch(error => {
+                    console.log("Sound play failed:", error);
+                    // Try playing again after a short delay
+                    setTimeout(() => {
+                        sound.play().catch(error => console.log("Retry failed:", error));
+                    }, 100);
+                });
+            }
+        }
+
+        function startGame() {
+            const email = document.getElementById('email-input').value;
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            playerEmail = email;
+            document.getElementById('signup-overlay').style.display = 'none';
+            
+            // Initialize sounds after user interaction
+            initSounds();
+            
+            // Initialize the game
+            init();
+            
+            // Update leaderboard
+            updateLeaderboard();
+            
+            // Enable betting buttons
+            document.querySelectorAll('.bet-button').forEach(button => {
+                button.disabled = false;
+            });
+        }
+
+        function init() {
+            // Create scene with darker background
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a3a1f); // Darker green background
+            
+            // Create camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 4;
+            camera.position.y = 4;
+            camera.rotation.x = -0.8;
+            
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('game-container').appendChild(renderer.domElement);
+            
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(0, 10, 5);
+            scene.add(directionalLight);
+            
+            // Initialize card textures
+            cardTextures = {
+                back: createCardTexture('back', '#1c5496', '#0a3069')
+            };
+            
+            // Create deck with textures
+            createCardTextures();
+            
+            // Create table
+            createTable();
+            
+            // Create card shoe
+            createShoe();
+            
+            // Create chips after creating the table
+            createChips();
+            
+            // Event listeners
+            window.addEventListener('resize', onWindowResize);
+            document.getElementById('player-button').addEventListener('click', () => placeBet('player'));
+            document.getElementById('banker-button').addEventListener('click', () => placeBet('banker'));
+            document.getElementById('tie-button').addEventListener('click', () => placeBet('tie'));
+            document.getElementById('new-game').addEventListener('click', startNewGame);
+            document.getElementById('help-button').addEventListener('click', showHelp);
+            document.getElementById('close-help').addEventListener('click', hideHelp);
+            
+            const betSlider = document.getElementById('bet-slider');
+            betSlider.addEventListener('input', updateBetValue);
+            
+            // Initialize the bet value display
+            updateBetValue();
+            
+            // Start animation loop
+            animate();
+            
+            // Play shuffle sound
+            playSound('shuffle');
+        }
+
+        function createCardTexture(value, color1 = '#ffffff', color2 = '#ff0000') {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024; // Doubled for higher resolution
+            canvas.height = 1024 * (cardHeight / cardWidth);
+            const context = canvas.getContext('2d');
+            
+            // Draw card background
+            context.fillStyle = '#ffffff';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw card border
+            context.strokeStyle = '#000000';
+            context.lineWidth = 20; // Thicker border
+            context.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+            
+            if (value === 'back') {
+                // Draw card back pattern
+                context.fillStyle = color1;
+                context.fillRect(40, 40, canvas.width - 80, canvas.height - 80);
+                
+                // Draw diagonal pattern
+                context.strokeStyle = color2;
+                context.lineWidth = 6;
+                for (let i = -canvas.width; i < canvas.width * 2; i += 60) {
+                    context.beginPath();
+                    context.moveTo(i, 0);
+                    context.lineTo(i + canvas.height, canvas.height);
+                    context.stroke();
+                }
+                
+                // Draw center emblem
+                context.fillStyle = color2;
+                context.beginPath();
+                context.ellipse(canvas.width / 2, canvas.height / 2, 160, 240, 0, 0, Math.PI * 2);
+                context.fill();
+                
+                context.fillStyle = color1;
+                context.font = 'bold 160px Arial';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillText('B', canvas.width / 2, canvas.height / 2);
+            } else {
+                // Draw card face
+                context.fillStyle = '#000000';
+                if (value.includes('hearts') || value.includes('diamonds')) {
+                    context.fillStyle = '#ff0000';
+                }
+                
+                // Extract the value and suit
+                const cardValue = value.split('_')[0];
+                const suit = value.split('_')[1];
+                
+                // Draw value at corners (larger)
+                context.font = 'bold 120px Arial';
+                context.textAlign = 'left';
+                context.fillText(cardValue, 60, 120);
+                
+                // Draw value at bottom right (upside down)
+                context.save();
+                context.translate(canvas.width - 60, canvas.height - 120);
+                context.rotate(Math.PI);
+                context.textAlign = 'left';
+                context.fillText(cardValue, 0, 0);
+                context.restore();
+                
+                // Draw suit symbol (larger)
+                context.font = 'bold 400px Arial';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                
+                let suitSymbol = '♠';
+                if (suit === 'hearts') suitSymbol = '♥';
+                else if (suit === 'diamonds') suitSymbol = '♦';
+                else if (suit === 'clubs') suitSymbol = '♣';
+                
+                context.fillText(suitSymbol, canvas.width / 2, canvas.height / 2);
+                
+                // Draw smaller suit symbols at corners
+                context.font = 'bold 80px Arial';
+                context.textAlign = 'left';
+                context.fillText(suitSymbol, 60, 200);
+                
+                // Draw suit symbol at bottom right (upside down)
+                context.save();
+                context.translate(canvas.width - 60, canvas.height - 200);
+                context.rotate(Math.PI);
+                context.textAlign = 'left';
+                context.fillText(suitSymbol, 0, 0);
+                context.restore();
+            }
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            return texture;
+        }
+
+        function createCardTextures() {
+            // Create textures for each card
+            for (const suit of suits) {
+                for (const value of cardValues) {
+                    const cardId = `${value}_${suit}`;
+                    cardTextures[cardId] = createCardTexture(cardId, '#ffffff', suit === 'hearts' || suit === 'diamonds' ? '#ff0000' : '#000000');
+                }
+            }
+        }
+
+        function createTable() {
+            // Create main table surface
+            const tableGeometry = new THREE.BoxGeometry(10, 0.2, 7);
+            const tableMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x0e5731,  // Darker casino green
+                roughness: 0.8,
+                metalness: 0.1
+            });
+            table = new THREE.Mesh(tableGeometry, tableMaterial);
+            scene.add(table);
+            
+            // Add golden rim
+            const rimGeometry = new THREE.BoxGeometry(10.4, 0.4, 7.4);
+            const rimMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xb8860b,  // Dark golden color
+                roughness: 0.3,
+                metalness: 0.8
+            });
+            const rim = new THREE.Mesh(rimGeometry, rimMaterial);
+            rim.position.y = -0.1;
+            scene.add(rim);
+            
+            // Create betting areas
+            createBettingArea("PLAYER", -2.5, 0.11, 0, 0x008CBA);
+            createBettingArea("BANKER", 2.5, 0.11, 0, 0xf44336);
+            createBettingArea("TIE", 0, 0.11, -2, 0x555555);
+            
+            // Add decorative lines
+            addTableLines();
+        }
+
+        function createBettingArea(text, x, y, z, color) {
+            // Create circular betting area
+            const circleGeometry = new THREE.CircleGeometry(0.8, 32);
+            const circleMaterial = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: 0.2
+            });
+            const circle = new THREE.Mesh(circleGeometry, circleMaterial);
+            circle.position.set(x, y + 0.01, z);
+            circle.rotation.x = -Math.PI / 2;
+            scene.add(circle);
+
+            // Add text label
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 128;
+            const context = canvas.getContext('2d');
+            
+            context.fillStyle = 'rgba(0, 0, 0, 0)';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            
+            context.font = 'bold 72px Arial';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillStyle = '#ffffff';
+            context.fillText(text, canvas.width / 2, canvas.height / 2);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.MeshBasicMaterial({ 
+                map: texture,
+                transparent: true
+            });
+            
+            const geometry = new THREE.PlaneGeometry(1.6, 0.4);
+            const label = new THREE.Mesh(geometry, material);
+            label.position.set(x, y + 0.02, z);
+            label.rotation.x = -Math.PI / 2;
+            scene.add(label);
+        }
+
+        function addTableLines() {
+            // Create curved lines for betting areas
+            const curvePoints = [];
+            for (let i = 0; i <= 32; i++) {
+                const angle = (i / 32) * Math.PI;
+                curvePoints.push(new THREE.Vector3(
+                    Math.cos(angle) * 3,
+                    0.11,
+                    Math.sin(angle) * 2 - 1
+                ));
+            }
+            
+            const curve = new THREE.CatmullRomCurve3(curvePoints);
+            const curveGeometry = new THREE.TubeGeometry(curve, 64, 0.02, 8, false);
+            const curveMaterial = new THREE.MeshStandardMaterial({
+                color: 0xb8860b,
+                metalness: 0.8,
+                roughness: 0.3
+            });
+            const curveMesh = new THREE.Mesh(curveGeometry, curveMaterial);
+            scene.add(curveMesh);
+
+            // Add player/banker dividing line
+            const lineGeometry = new THREE.BoxGeometry(0.02, 0.01, 4);
+            const lineMaterial = new THREE.MeshStandardMaterial({
+                color: 0xb8860b,
+                metalness: 0.8,
+                roughness: 0.3
+            });
+            const line = new THREE.Mesh(lineGeometry, lineMaterial);
+            line.position.set(0, 0.11, 0);
+            scene.add(line);
+        }
+
+        function createShoe() {
+            // Create card shoe
+            const shoeGeometry = new THREE.BoxGeometry(1.2, 0.6, 1.8);
+            const shoeMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x222222,
+                roughness: 0.7,
+                metalness: 0.3
+            });
+            shoe = new THREE.Mesh(shoeGeometry, shoeMaterial);
+            shoe.position.set(4, 0.4, -2.5);
+            scene.add(shoe);
+        }
+
+        function createCard(cardId = null) {
+            const geometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
+            
+            // Create larger, clearer card textures
+            const frontMaterial = new THREE.MeshBasicMaterial({ 
+                map: cardId ? cardTextures[cardId] : cardTextures.back,
+                side: THREE.FrontSide
+            });
+            
+            const backMaterial = new THREE.MeshBasicMaterial({ 
+                map: cardTextures.back,
+                side: THREE.BackSide
+            });
+            
+            const card = new THREE.Group();
+            
+            const frontMesh = new THREE.Mesh(geometry, frontMaterial);
+            const backMesh = new THREE.Mesh(geometry, backMaterial);
+            
+            card.add(frontMesh);
+            card.add(backMesh);
+            
+            // Store card ID
+            card.userData = { cardId: cardId, value: cardId ? getCardValue(cardId) : 0 };
+            
+            return card;
+        }
+
+        function getCardValue(cardId) {
+            const value = cardId.split('_')[0];
+            if (value === 'A') return 1;
+            if (['10', 'J', 'Q', 'K'].includes(value)) return 0;
+            return parseInt(value);
+        }
+
+        function dealCard(isPlayer, index, delay) {
+            return new Promise(resolve => {
+                const randomSuit = suits[Math.floor(Math.random() * suits.length)];
+                const randomValue = cardValues[Math.floor(Math.random() * cardValues.length)];
+                const cardId = `${randomValue}_${randomSuit}`;
+                
+                const card = createCard(cardId);
+                card.position.copy(shoe.position);
+                card.position.y += 0.3;
+                card.rotation.x = -Math.PI / 3;
+                card.rotation.y = Math.PI;
+                scene.add(card);
+                
+                if (isPlayer) {
+                    playerCards.push(card);
+                } else {
+                    bankerCards.push(card);
+                }
+                
+                const x = isPlayer ? -1.5 + (index * 0.8) : 1.5 + (index * 0.8);
+                const z = isPlayer ? -0.3 : 0.3;
+                const targetY = 0.7;
+                
+                setTimeout(() => {
+                    playSound('deal');
+                    // Reduced animation time from 800ms to 400ms
+                    new TWEEN.Tween(card.position)
+                        .to({ x: x, z: z, y: targetY }, 400)
+                        .easing(TWEEN.Easing.Quadratic.Out)
+                        .start();
+                    
+                    setTimeout(() => {
+                        // Reduced flip animation from 500ms to 250ms
+                        new TWEEN.Tween(card.rotation)
+                            .to({ y: 0 }, 250)
+                            .easing(TWEEN.Easing.Quadratic.Out)
+                            .start();
+                        
+                        setTimeout(resolve, 250);
+                    }, 400);
+                }, delay);
+            });
+        }
+
+        function updateBetValue() {
+            const betSlider = document.getElementById('bet-slider');
+            currentBet = parseInt(betSlider.value);
+            document.getElementById('bet-value').textContent = `$${currentBet}`;
+        }
+
+        function allIn() {
+            const betSlider = document.getElementById('bet-slider');
+            betSlider.value = balance;
+            currentBet = balance;
+            document.getElementById('bet-value').textContent = `$${currentBet}`;
+        }
+
+        function placeBet(type) {
+            if (gameInProgress || checkGameOver()) return;
+            
+            // Check if player has enough balance
+            if (balance < currentBet) {
+                alert("Not enough balance!");
+                return;
+            }
+            
+            bettingOn = type;
+            gameInProgress = true;
+            
+            // Update balance
+            balance -= currentBet;
+            document.getElementById('balance').textContent = `Balance: $${balance}`;
+            
+            // Display bet indicator
+            if (type === 'player') {
+                playerBet = currentBet;
+                document.getElementById('player-bet').textContent = `$${currentBet}`;
+                document.getElementById('player-bet').style.display = 'block';
+            } else if (type === 'banker') {
+                bankerBet = currentBet;
+                document.getElementById('banker-bet').textContent = `$${currentBet}`;
+                document.getElementById('banker-bet').style.display = 'block';
+            } else {
+                tieBet = currentBet;
+                document.getElementById('tie-bet').textContent = `$${currentBet}`;
+                document.getElementById('tie-bet').style.display = 'block';
+            }
+            
+            // Disable bet buttons
+            document.querySelectorAll('.bet-button').forEach(button => {
+                button.disabled = true;
+            });
+            
+            // Start the game
+            playGame();
+        }
+
+        async function playGame() {
+            // Reset cards
+            playerCards.forEach(card => scene.remove(card));
+            bankerCards.forEach(card => scene.remove(card));
+            playerCards = [];
+            bankerCards = [];
+            
+            // Deal initial cards
+            await dealCard(true, 0, 0);
+            await dealCard(false, 0, 0);
+            await dealCard(true, 1, 0);
+            await dealCard(false, 1, 0);
+            
+            // Calculate initial totals
+            let playerTotal = calculateTotal(playerCards);
+            let bankerTotal = calculateTotal(bankerCards);
+            
+            // Display totals
+            document.getElementById('player-total').textContent = `Player: ${playerTotal}`;
+            document.getElementById('banker-total').textContent = `Banker: ${bankerTotal}`;
+            document.getElementById('player-total').style.display = 'block';
+            document.getElementById('banker-total').style.display = 'block';
+            
+            // Check if third card is needed for player
+            if ((playerTotal <= 5) && !(playerTotal >= 8 || bankerTotal >= 8)) {
+                await dealCard(true, 2, 500);
+                playerTotal = calculateTotal(playerCards);
+                document.getElementById('player-total').textContent = `Player: ${playerTotal}`;
+            }
+            
+            // Check if third card is needed for banker
+            const playerThirdCard = playerCards.length === 3 ? playerCards[2].userData.value : -1;
+            
+            if (shouldDrawThirdCardBanker(bankerTotal, playerThirdCard, playerCards.length)) {
+                await dealCard(false, 2, 500);
+                bankerTotal = calculateTotal(bankerCards);
+                document.getElementById('banker-total').textContent = `Banker: ${bankerTotal}`;
+            }
+            
+            // Determine winner
+            setTimeout(() => {
+                let result = "";
+                if (playerTotal === bankerTotal) {
+                    result = "Tie";
+                } else if (playerTotal > bankerTotal) {
+                    result = "Player wins";
+                } else {
+                    result = "Banker wins";
+                }
+                
+                // Calculate winnings and show animation
+                let winnings = 0;
+                let winPosition = new THREE.Vector3();
+                
+                if ((result === "Tie" && bettingOn === 'tie') ||
+                    (result === "Player wins" && bettingOn === 'player') ||
+                    (result === "Banker wins" && bettingOn === 'banker')) {
+                    
+                    if (result === "Tie") {
+                        winnings = tieBet * 9;
+                        winPosition.set(0, 0.1, -2);
+                    } else if (result === "Player wins") {
+                        winnings = playerBet * 2;
+                        winPosition.set(-2.5, 0.1, 0);
+                    } else {
+                        winnings = bankerBet * 1.95;
+                        winPosition.set(2.5, 0.1, 0);
+                    }
+                    playSound('win');
+                    showWinningAnimation(winnings, winPosition);
+                } else {
+                    playSound('lose');
+                }
+                
+                // Update balance
+                if (winnings > 0) {
+                    balance += winnings;
+                    document.getElementById('balance').textContent = `Balance: $${balance}`;
+                    result += `<br>You won $${winnings.toFixed(2)}!`;
+                } else {
+                    result += `<br>You lost $${currentBet}!`;
+                }
+                
+                // Display result
+                document.getElementById('result').innerHTML = result;
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('new-game').style.display = 'block';
+                
+                updateLeaderboard();
+            }, 1000);
+        }
+
+        function calculateTotal(cards) {
+            let total = 0;
+            for (const card of cards) {
+                total += card.userData.value;
+            }
+            
+            // Baccarat rule: only the rightmost digit counts
+            return total % 10;
+        }
+
+        function shouldDrawThirdCardBanker(bankerTotal, playerThirdCard, playerCardCount) {
+            // No third card if player or banker has a natural (8 or 9)
+            if (bankerTotal >= 8) return false;
+            
+            // If player didn't draw a third card
+            if (playerCardCount === 2) {
+                return bankerTotal <= 5;
+            }
+            
+            // Rules based on banker's total and player's third card
+            if (bankerTotal <= 2) return true;
+            if (bankerTotal === 3 && playerThirdCard !== 8) return true;
+            if (bankerTotal === 4 && (playerThirdCard >= 2 && playerThirdCard <= 7)) return true;
+            if (bankerTotal === 5 && (playerThirdCard >= 4 && playerThirdCard <= 7)) return true;
+            if (bankerTotal === 6 && (playerThirdCard === 6 || playerThirdCard === 7)) return true;
+            
+            return false;
+        }
+
+        function startNewGame() {
+            // Reset game state
+            gameInProgress = false;
+            bettingOn = null;
+            playerBet = 0;
+            bankerBet = 0;
+            tieBet = 0;
+            
+            // Remove old cards from the scene
+            playerCards.forEach(card => scene.remove(card));
+            bankerCards.forEach(card => scene.remove(card));
+            playerCards = [];
+            bankerCards = [];
+            
+            // Hide all UI elements
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('new-game').style.display = 'none';
+            document.getElementById('player-total').style.display = 'none';
+            document.getElementById('banker-total').style.display = 'none';
+            document.getElementById('player-bet').style.display = 'none';
+            document.getElementById('banker-bet').style.display = 'none';
+            document.getElementById('tie-bet').style.display = 'none';
+            
+            // Enable bet buttons and reset their state
+            document.querySelectorAll('.bet-button').forEach(button => {
+                button.disabled = false;
+                button.style.opacity = '1';
+            });
+            
+            // Update bet slider max value to current balance
+            const betSlider = document.getElementById('bet-slider');
+            betSlider.max = balance;  // Allow betting up to full balance
+            betSlider.value = Math.min(25, balance);
+            currentBet = Math.min(25, balance);  // Reset current bet
+            updateBetValue();
+            
+            // Play shuffle sound
+            playSound('shuffle');
+        }
+
+        function showHelp() {
+            document.getElementById('help-panel').style.display = 'block';
+        }
+
+        function hideHelp() {
+            document.getElementById('help-panel').style.display = 'none';
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            TWEEN.update();
+            renderer.render(scene, camera);
+        }
+
+        function updateLeaderboard() {
+            // In a real implementation, this would fetch from a server
+            leaderboardData = [
+                { email: playerEmail, earnings: balance - 1000 },
+                // Add more players here
+            ];
+            
+            // Sort by earnings
+            leaderboardData.sort((a, b) => b.earnings - a.earnings);
+        }
+
+        function checkGameOver() {
+            if (balance <= 0) {
+                document.getElementById('game-over-overlay').style.display = 'flex';
+                return true;
+            }
+            return false;
+        }
+
+        function restartGame() {
+            balance = 1000;
+            document.getElementById('balance').textContent = `Balance: $${balance}`;
+            document.getElementById('game-over-overlay').style.display = 'none';
+            startNewGame();
+        }
+
+        document.getElementById('all-in-button').addEventListener('click', allIn);
+    </script>
+</body>
+</html>
